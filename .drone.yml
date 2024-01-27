@@ -1,0 +1,28 @@
+---
+kind: pipeline
+name: docker build/push
+type: docker
+
+
+# Ideally this would be in two pipelines...one that builds at push, and one that deploys at promotion.
+# That requires changing up the paradigm where it does runtime replacement of variables. I'll look at that later.
+
+steps:
+  - name: check if deployment valid
+    image: austin1howard/drone-plugin-deploy-gate
+    settings:
+      autodeploy_branches:
+        - master
+      check_mainline: false  # This doesn't work on promotion builds bc drone doesn't inject the netrc auth info then.
+  - name: build and push docker
+    image: plugins/docker
+    settings:
+      username: austin1howard
+      password:
+        from_secret: dockerhub_token
+      repo: austin1howard/xhaven-docker
+      tags:
+        - latest
+        - git-${DRONE_COMMIT_SHA:0:8}
+      build_args:
+        - BUILD_ENV=${DRONE_DEPLOY_TO:=${DRONE_BRANCH}}
