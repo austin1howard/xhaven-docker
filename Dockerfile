@@ -22,7 +22,11 @@ WORKDIR /app
 
 # Including x11-apps for debugging and to ensure all libs are present
 RUN apt-get update -y && \
-	apt-get install -y x11-apps wget && \
+	apt-get install -y \
+		x11-apps \
+		wget \
+		libgtk-3-0 \
+		&& \
 	apt-get clean
 
 # Copy over downloaded files
